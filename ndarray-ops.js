@@ -1,6 +1,6 @@
 "use strict"
 
-var compile = require("cwise-compiler")
+var compileCwise = require("cwise-compiler")
 
 var EmptyProc = {
   body: "",
@@ -31,7 +31,7 @@ function fixup(x) {
 }
 
 function pcompile(user_args) {
-  return compile({
+  return compileCwise({
     args:     user_args.args,
     pre:      fixup(user_args.pre),
     body:     fixup(user_args.body),
@@ -268,7 +268,7 @@ var math_noncomm = [
   }
 })();
 
-exports.any = compile({
+exports.any = compileCwise({
   args:["array"],
   pre: EmptyProc,
   body: {args:[{name:"a", lvalue:false, rvalue:true, count:1}], body: "if(a){return true}", localVars: [], thisVars: []},
@@ -276,7 +276,7 @@ exports.any = compile({
   funcName: "any"
 })
 
-exports.all = compile({
+exports.all = compileCwise({
   args:["array"],
   pre: EmptyProc,
   body: {args:[{name:"x", lvalue:false, rvalue:true, count:1}], body: "if(!x){return false}", localVars: [], thisVars: []},
@@ -284,7 +284,7 @@ exports.all = compile({
   funcName: "all"
 })
 
-exports.sum = compile({
+exports.sum = compileCwise({
   args:["array"],
   pre: {args:[], localVars:[], thisVars:["this_s"], body:"this_s=0"},
   body: {args:[{name:"a", lvalue:false, rvalue:true, count:1}], body: "this_s+=a", localVars: [], thisVars: ["this_s"]},
@@ -292,7 +292,7 @@ exports.sum = compile({
   funcName: "sum"
 })
 
-exports.prod = compile({
+exports.prod = compileCwise({
   args:["array"],
   pre: {args:[], localVars:[], thisVars:["this_s"], body:"this_s=1"},
   body: {args:[{name:"a", lvalue:false, rvalue:true, count:1}], body: "this_s*=a", localVars: [], thisVars: ["this_s"]},
@@ -300,7 +300,7 @@ exports.prod = compile({
   funcName: "prod"
 })
 
-exports.norm2squared = compile({
+exports.norm2squared = compileCwise({
   args:["array"],
   pre: {args:[], localVars:[], thisVars:["this_s"], body:"this_s=0"},
   body: {args:[{name:"a", lvalue:false, rvalue:true, count:2}], body: "this_s+=a*a", localVars: [], thisVars: ["this_s"]},
@@ -308,7 +308,7 @@ exports.norm2squared = compile({
   funcName: "norm2squared"
 })
 
-exports.norm2 = compile({
+exports.norm2 = compileCwise({
   args:["array"],
   pre: {args:[], localVars:[], thisVars:["this_s"], body:"this_s=0"},
   body: {args:[{name:"a", lvalue:false, rvalue:true, count:2}], body: "this_s+=a*a", localVars: [], thisVars: ["this_s"]},
@@ -317,7 +317,7 @@ exports.norm2 = compile({
 })
 
 
-exports.norminf = compile({
+exports.norminf = compileCwise({
   args:["array"],
   pre: {args:[], localVars:[], thisVars:["this_s"], body:"this_s=0"},
   body: {args:[{name:"a", lvalue:false, rvalue:true, count:4}], body:"if(-a>this_s){this_s=-a}else if(a>this_s){this_s=a}", localVars: [], thisVars: ["this_s"]},
@@ -325,7 +325,7 @@ exports.norminf = compile({
   funcName: "norminf"
 })
 
-exports.norm1 = compile({
+exports.norm1 = compileCwise({
   args:["array"],
   pre: {args:[], localVars:[], thisVars:["this_s"], body:"this_s=0"},
   body: {args:[{name:"a", lvalue:false, rvalue:true, count:3}], body: "this_s+=a<0?-a:a", localVars: [], thisVars: ["this_s"]},
@@ -333,7 +333,7 @@ exports.norm1 = compile({
   funcName: "norm1"
 })
 
-exports.sup = compile({
+exports.sup = compileCwise({
   args: [ "array" ],
   pre:
    { body: "this_h=-Infinity",
@@ -352,7 +352,7 @@ exports.sup = compile({
      localVars: [] }
  })
 
-exports.inf = compile({
+exports.inf = compileCwise({
   args: [ "array" ],
   pre:
    { body: "this_h=Infinity",
@@ -371,7 +371,7 @@ exports.inf = compile({
      localVars: [] }
  })
 
-exports.argmin = compile({
+exports.argmin = compileCwise({
   args:["index","array","shape"],
   pre:{
     body:"{this_v=Infinity;this_i=_inline_0_arg2_.slice(0)}",
@@ -396,7 +396,7 @@ exports.argmin = compile({
     localVars:[]}
 })
 
-exports.argmax = compile({
+exports.argmax = compileCwise({
   args:["index","array","shape"],
   pre:{
     body:"{this_v=-Infinity;this_i=_inline_0_arg2_.slice(0)}",
@@ -439,7 +439,7 @@ exports.assigns = makeOp({
   funcName: "assigns" })
 
 
-exports.equals = compile({
+exports.equals = compileCwise({
   args:["array", "array"],
   pre: EmptyProc,
   body: {args:[{name:"x", lvalue:false, rvalue:true, count:1},
