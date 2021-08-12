@@ -7,9 +7,7 @@
     "example": "example",
     "test": "test"
   },
-  "dependencies": {
-    "uniq": "^1.0.1"
-  },
+  "dependencies": {},
   "devDependencies": {
     "tape": "~1.0.4",
     "ndarray": "~1.0.4"
