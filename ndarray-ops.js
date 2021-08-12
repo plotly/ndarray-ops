@@ -205,17 +205,6 @@ var CACHED_thunk = {
   mul: function (compile) {
     var CACHED = {}
     return function mul_cwise_thunk(array0, array1, array2) {
-      if (!(array0.shape.length === array1.shape.length + 0 && array0.shape.length === array2.shape.length + 0))
-        throw new Error("cwise: Arrays do not all have the same dimensionality!")
-      for (var shapeIndex = array0.shape.length - 0; shapeIndex-- > 0; ) {
-        if (
-          !(
-            array0.shape[shapeIndex + 0] === array1.shape[shapeIndex + 0] &&
-            array0.shape[shapeIndex + 0] === array2.shape[shapeIndex + 0]
-          )
-        )
-          throw new Error("cwise: Arrays do not all have the same shape!")
-      }
       var t0 = array0.dtype,
         r0 = array0.order,
         t1 = array1.dtype,
@@ -244,12 +233,6 @@ var CACHED_thunk = {
   muls: function (compile) {
     var CACHED = {}
     return function muls_cwise_thunk(array0, array1, scalar2) {
-      if (!(array0.shape.length === array1.shape.length + 0))
-        throw new Error("cwise: Arrays do not all have the same dimensionality!")
-      for (var shapeIndex = array0.shape.length - 0; shapeIndex-- > 0; ) {
-        if (!(array0.shape[shapeIndex + 0] === array1.shape[shapeIndex + 0]))
-          throw new Error("cwise: Arrays do not all have the same shape!")
-      }
       var t0 = array0.dtype,
         r0 = array0.order,
         t1 = array1.dtype,
@@ -287,17 +270,6 @@ var CACHED_thunk = {
   div: function (compile) {
     var CACHED = {}
     return function div_cwise_thunk(array0, array1, array2) {
-      if (!(array0.shape.length === array1.shape.length + 0 && array0.shape.length === array2.shape.length + 0))
-        throw new Error("cwise: Arrays do not all have the same dimensionality!")
-      for (var shapeIndex = array0.shape.length - 0; shapeIndex-- > 0; ) {
-        if (
-          !(
-            array0.shape[shapeIndex + 0] === array1.shape[shapeIndex + 0] &&
-            array0.shape[shapeIndex + 0] === array2.shape[shapeIndex + 0]
-          )
-        )
-          throw new Error("cwise: Arrays do not all have the same shape!")
-      }
       var t0 = array0.dtype,
         r0 = array0.order,
         t1 = array1.dtype,
@@ -326,12 +298,6 @@ var CACHED_thunk = {
   divs: function (compile) {
     var CACHED = {}
     return function divs_cwise_thunk(array0, array1, scalar2) {
-      if (!(array0.shape.length === array1.shape.length + 0))
-        throw new Error("cwise: Arrays do not all have the same dimensionality!")
-      for (var shapeIndex = array0.shape.length - 0; shapeIndex-- > 0; ) {
-        if (!(array0.shape[shapeIndex + 0] === array1.shape[shapeIndex + 0]))
-          throw new Error("cwise: Arrays do not all have the same shape!")
-      }
       var t0 = array0.dtype,
         r0 = array0.order,
         t1 = array1.dtype,
@@ -369,12 +335,6 @@ var CACHED_thunk = {
   assign: function (compile) {
     var CACHED = {}
     return function assign_cwise_thunk(array0, array1) {
-      if (!(array0.shape.length === array1.shape.length + 0))
-        throw new Error("cwise: Arrays do not all have the same dimensionality!")
-      for (var shapeIndex = array0.shape.length - 0; shapeIndex-- > 0; ) {
-        if (!(array0.shape[shapeIndex + 0] === array1.shape[shapeIndex + 0]))
-          throw new Error("cwise: Arrays do not all have the same shape!")
-      }
       var t0 = array0.dtype,
         r0 = array0.order,
         t1 = array1.dtype,
@@ -402,150 +362,10 @@ function createThunk(proc) {
   return thunk(compile.bind(undefined, proc))
 }
 
-function Procedure() {
-  this.argTypes = []
-  this.shimArgs = []
-  this.arrayArgs = []
-  this.arrayBlockIndices = []
-  this.scalarArgs = []
-  this.offsetArgs = []
-  this.offsetArgIndex = []
-  this.indexArgs = []
-  this.shapeArgs = []
-  this.funcName = ""
-  this.pre = null
-  this.body = null
-  this.post = null
-  this.debug = false
-}
-
-function compileCwise(user_args) {
-  //Create procedure
-  var proc = new Procedure()
-
-  //Parse blocks
-  proc.pre    = user_args.pre
-  proc.body   = user_args.body
-  proc.post   = user_args.post
-
-  //Parse arguments
-  var proc_args = user_args.args.slice(0)
-  proc.argTypes = proc_args
-  for(var i=0; i<proc_args.length; ++i) {
-    var arg_type = proc_args[i]
-    if(arg_type === "array" || (typeof arg_type === "object" && arg_type.blockIndices)) {
-      proc.argTypes[i] = "array"
-      proc.arrayArgs.push(i)
-      proc.arrayBlockIndices.push(arg_type.blockIndices ? arg_type.blockIndices : 0)
-      proc.shimArgs.push("array" + i)
-      if(i < proc.pre.args.length && proc.pre.args[i].count>0) {
-        throw new Error("cwise: pre() block may not reference array args")
-      }
-      if(i < proc.post.args.length && proc.post.args[i].count>0) {
-        throw new Error("cwise: post() block may not reference array args")
-      }
-    } else if(arg_type === "scalar") {
-      proc.scalarArgs.push(i)
-      proc.shimArgs.push("scalar" + i)
-    } else if(arg_type === "index") {
-      proc.indexArgs.push(i)
-      if(i < proc.pre.args.length && proc.pre.args[i].count > 0) {
-        throw new Error("cwise: pre() block may not reference array index")
-      }
-      if(i < proc.body.args.length && proc.body.args[i].lvalue) {
-        throw new Error("cwise: body() block may not write to array index")
-      }
-      if(i < proc.post.args.length && proc.post.args[i].count > 0) {
-        throw new Error("cwise: post() block may not reference array index")
-      }
-    } else if(arg_type === "shape") {
-      proc.shapeArgs.push(i)
-      if(i < proc.pre.args.length && proc.pre.args[i].lvalue) {
-        throw new Error("cwise: pre() block may not write to array shape")
-      }
-      if(i < proc.body.args.length && proc.body.args[i].lvalue) {
-        throw new Error("cwise: body() block may not write to array shape")
-      }
-      if(i < proc.post.args.length && proc.post.args[i].lvalue) {
-        throw new Error("cwise: post() block may not write to array shape")
-      }
-    } else if(typeof arg_type === "object" && arg_type.offset) {
-      proc.argTypes[i] = "offset"
-      proc.offsetArgs.push({ array: arg_type.array, offset:arg_type.offset })
-      proc.offsetArgIndex.push(i)
-    } else {
-      throw new Error("cwise: Unknown argument type " + proc_args[i])
-    }
-  }
-
-  //Make sure at least one array argument was specified
-  if(proc.arrayArgs.length <= 0) {
-    throw new Error("cwise: No array arguments specified")
-  }
-
-  //Make sure arguments are correct
-  if(proc.pre.args.length > proc_args.length) {
-    throw new Error("cwise: Too many arguments in pre() block")
-  }
-  if(proc.body.args.length > proc_args.length) {
-    throw new Error("cwise: Too many arguments in body() block")
-  }
-  if(proc.post.args.length > proc_args.length) {
-    throw new Error("cwise: Too many arguments in post() block")
-  }
-
-  //Check debug flag
-  proc.debug = !!user_args.printCode || !!user_args.debug
-
-  //Retrieve name
-  proc.funcName = user_args.funcName || "cwise"
-
-  //Read in block size
-  proc.blockSize = user_args.blockSize || 64
-
-  return createThunk(proc)
-}
-
-var EmptyProc = {
-  body: "",
-  args: [],
-  thisVars: [],
-  localVars: []
-}
-
-function fixup(x) {
-  if(!x) {
-    return EmptyProc
-  }
-  for(var i=0; i<x.args.length; ++i) {
-    var a = x.args[i]
-    if(i === 0) {
-      x.args[i] = {name: a, lvalue:true, rvalue: !!x.rvalue, count:x.count||1 }
-    } else {
-      x.args[i] = {name: a, lvalue:false, rvalue:true, count: 1}
-    }
-  }
-  if(!x.thisVars) {
-    x.thisVars = []
-  }
-  if(!x.localVars) {
-    x.localVars = []
-  }
-  return x
-}
-
-function pcompile(user_args) {
-  return compileCwise({
-    args:     user_args.args,
-    pre:      fixup(user_args.pre),
-    body:     fixup(user_args.body),
-    post:     fixup(user_args.proc),
+function makeOp(user_args) {
+  return createThunk({
     funcName: user_args.funcName
   })
-}
-
-function makeOp(user_args) {
-  return pcompile(user_args)
 }
 
 var assign_ops = {
@@ -554,30 +374,17 @@ var assign_ops = {
 }
 ;(function(){
   for(var id in assign_ops) {
-    var op = assign_ops[id]
     exports[id] = makeOp({
-      args: ["array","array","array"],
-      body: {args:["a","b","c"],
-             body: "a=b"+op+"c"},
       funcName: id
     })
     exports[id+"s"] = makeOp({
-      args: ["array", "array", "scalar"],
-      body: {args:["a","b","s"],
-             body:"a=b"+op+"s"},
       funcName: id+"s"
     })
     exports[id+"seq"] = makeOp({
-      args: ["array","scalar"],
-      body: {args:["a","s"],
-             body:"a"+op+"=s"},
-      rvalue: true,
       funcName: id+"seq"
     })
   }
 })();
 
 exports.assign = makeOp({
-  args:["array", "array"],
-  body: {args:["a", "b"], body:"a=b"},
   funcName: "assign" })
