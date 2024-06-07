@@ -2,6 +2,12 @@ ndarray-ops
 ===========
 A collection of common mathematical operations for [ndarrays](http://github.com/mikolalysenko/ndarray).  Implemented using [cwise](http://github.com/mikolalysenko/cwise)
 
+<div align="center">
+  <a href="https://dash.plotly.com/project-maintenance">
+    <img src="https://dash.plotly.com/assets/images/maintained-by-plotly.png" width="400px" alt="Maintained by Plotly">
+  </a>
+</div>
+
 Usage
 =====
 First, install the library using npm:
